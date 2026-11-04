@@ -242,25 +242,51 @@ fn exe_dir() -> PathBuf {
         .unwrap_or_default()
 }
 
-/// Only SYSTEM and Administrators may change the data folder; users can read it
-/// (the extension bridge runs as the user and needs to read the state).
-fn harden_data_dir() {
+/// Puts the data folder back on the default ProgramData permissions: everyone
+/// can read (the browser bridge runs as the normal user and must read the
+/// state), only administrators and SYSTEM can change or delete our files.
+/// v1.0 removed inherited permissions, which locked the bridge out; `/reset`
+/// repairs folders created by that version.
+fn fix_data_dir_permissions() {
     let dir = data_dir();
     let _ = std::fs::create_dir_all(&dir);
     let d = dir.to_string_lossy().to_string();
-    run_hidden(
-        "icacls",
-        &[
-            d.as_str(),
-            "/inheritance:r",
-            "/grant:r",
-            "*S-1-5-18:(OI)(CI)F",
-            "*S-1-5-32-544:(OI)(CI)F",
-            "*S-1-5-32-545:(OI)(CI)RX",
-            "/T",
-            "/Q",
-        ],
-    );
+    run_hidden("icacls", &[d.as_str(), "/reset", "/T", "/C", "/Q"]);
+}
+
+/// Removes what the earlier "Unscroll" builds left behind.
+fn remove_legacy_unscroll() {
+    run_hidden("schtasks", &["/Delete", "/TN", r"DarkSky Studios\Unscroll Enforcer", "/F"]);
+    for base in plan::NATIVE_HOST_KEYS {
+        let _ = hklm().delete_subkey_all(format!(r"{base}\com.darkskystudios.unscroll"));
+    }
+    let _ = hklm().delete_subkey_all(r"SOFTWARE\DarkSky Studios\Unscroll");
+    let root = std::env::var("ProgramData").unwrap_or_else(|_| r"C:\ProgramData".into());
+    let _ = std::fs::remove_dir_all(PathBuf::from(root).join("Unscroll"));
+    // Old hosts-file section.
+    let path = hosts_path();
+    if let Ok(text) = std::fs::read_to_string(&path) {
+        if text.contains("# >>> Unscroll (DarkSky Studios)") {
+            let mut out = Vec::new();
+            let mut inside = false;
+            for line in text.lines() {
+                let t = line.trim();
+                if t.starts_with("# >>> Unscroll") {
+                    inside = true;
+                    continue;
+                }
+                if t.starts_with("# <<< Unscroll") {
+                    inside = false;
+                    continue;
+                }
+                if !inside {
+                    out.push(line.trim_end_matches('\r'));
+                }
+            }
+            let nl = if text.contains("\r\n") { "\r\n" } else { "\n" };
+            let _ = std::fs::write(&path, out.join(nl) + nl);
+        }
+    }
 }
 
 fn register_native_host() {
@@ -295,7 +321,8 @@ fn register_task() {
 }
 
 pub fn setup() {
-    harden_data_dir();
+    remove_legacy_unscroll();
+    fix_data_dir_permissions();
     register_native_host();
     register_task();
 }

@@ -1,6 +1,7 @@
 //! Native messaging host. The browser starts it, sends one JSON message, reads
 //! one reply and closes it. Runs as the normal user, read-only.
-#![windows_subsystem = "windows"]
+// Console subsystem on purpose: browsers talk to native hosts over the
+// console stdin/stdout and start them without a visible window.
 
 use std::io::{Read, Write};
 use unshorts_core::{decode, state::State, state_path};

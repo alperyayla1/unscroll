@@ -41,3 +41,4 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .dot.ok { background: var(--ok); }
 .dot.bad { background: var(--danger); }
 .note { font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+.note.err { color: #f87171; font-family: Consolas, monospace; font-size: 11px; word-break: break-word; user-select: text; }

@@ -22,10 +22,11 @@ async function refresh() {
   try {
     const r = await chrome.runtime.sendNativeMessage(NATIVE_HOST, { cmd: "get", browser: browserName() });
     if (!r || !r.ok) throw new Error("bad reply");
-    cfg = { active: r.active, locked: r.locked, remainingMs: r.remainingMs, levels: r.levels, connected: true, at: Date.now() };
-  } catch (_) {
+    cfg = { active: r.active, locked: r.locked, remainingMs: r.remainingMs, levels: r.levels, connected: true, at: Date.now(), error: null };
+  } catch (e) {
     const cached = await getCached();
-    cfg = { ...(cached || DEFAULT_CONFIG), connected: false, at: cached ? cached.at : Date.now() };
+    const error = String((e && e.message) || (chrome.runtime.lastError && chrome.runtime.lastError.message) || e);
+    cfg = { ...(cached || DEFAULT_CONFIG), connected: false, at: cached ? cached.at : Date.now(), error };
   }
   await chrome.storage.local.set({ config: cfg });
   await applyRules(cfg);

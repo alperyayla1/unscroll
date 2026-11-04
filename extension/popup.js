@@ -29,6 +29,9 @@ function render(cfg) {
   document.getElementById("dot").className = "dot " + (cfg.connected ? "ok" : "bad");
   document.getElementById("conn").textContent = cfg.connected ? t("connected") : t("not_connected");
   document.getElementById("note").textContent = t("controls_in_app");
+  const err = document.getElementById("err");
+  err.hidden = cfg.connected || !cfg.error;
+  err.textContent = cfg.error ? `Error: ${cfg.error}` : "";
 }
 
 chrome.storage.local.get("config").then(({ config }) => config && render(config));

@@ -35,7 +35,8 @@ fn main() {
                 if s.is_locked() {
                     return Err(RuleError::Locked);
                 }
-                s.set_enabled(false)?;
+                s.set_shorts(false)?;
+                s.set_sites(false)?;
                 Ok(std::mem::take(&mut s.owned_policies))
             });
             match r {
@@ -53,7 +54,8 @@ fn run_app() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             commands::get_view,
-            commands::set_enabled,
+            commands::set_shorts,
+            commands::set_sites,
             commands::set_level,
             commands::set_hard,
             commands::start_lock,

@@ -20,13 +20,44 @@
   </header>
 
   <main id="view-main" class="view">
-    <!-- Main switch -->
-    <section class="card switch-card">
-      <div class="switch-text">
-        <h2 data-i18n="block_title"></h2>
-        <p data-i18n="block_sub"></p>
+    <!-- Shorts: needs the browser extension -->
+    <section class="card feature" id="card-shorts">
+      <div class="feature-head">
+        <div class="feature-text">
+          <h2 data-i18n="shorts_title"></h2>
+          <p data-i18n="shorts_sub"></p>
+        </div>
+        <button id="toggle-shorts" class="toggle big" role="switch" aria-checked="false"><span></span></button>
       </div>
-      <button id="main-toggle" class="toggle big" role="switch" aria-checked="false"><span></span></button>
+      <div class="req" id="shorts-req">
+        <svg viewBox="0 0 24 24"><path d="M10 3h4v3a2 2 0 1 0 4 0h0v4h-3a2 2 0 1 0 0 4h3v4h-4v-3a2 2 0 1 0-4 0v3H6v-4h3a2 2 0 1 0 0-4H6V6h4z"/></svg>
+        <span data-i18n="needs_ext"></span>
+      </div>
+      <div class="ext-status" id="ext-status">
+        <span class="dot" id="ext-dot"></span>
+        <div class="ext-text">
+          <div id="ext-title"></div>
+          <small id="ext-sub"></small>
+        </div>
+        <button id="ext-setup" class="mini" data-i18n="setup"></button>
+      </div>
+    </section>
+
+    <!-- Sites: works without the extension -->
+    <section class="card feature" id="card-sites">
+      <div class="feature-head">
+        <div class="feature-text">
+          <h2 data-i18n="sites_title"></h2>
+          <p data-i18n="sites_sub"></p>
+        </div>
+        <button id="toggle-sites" class="toggle big" role="switch" aria-checked="false"><span></span></button>
+      </div>
+      <div class="req ok">
+        <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        <span data-i18n="no_ext_needed"></span>
+      </div>
+      <div class="site-chips" id="site-chips"></div>
+      <p class="muted small" id="sites-empty" data-i18n="sites_empty" hidden></p>
     </section>
 
     <!-- Focus lock: picker -->
@@ -62,11 +93,6 @@
       <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
     </button>
 
-    <footer class="ext" id="ext">
-      <span class="dot" id="ext-dot"></span>
-      <span id="ext-text"></span>
-      <button id="ext-setup" class="link" data-i18n="setup"></button>
-    </footer>
   </main>
 
   <!-- Advanced settings -->
@@ -77,7 +103,7 @@
     </button>
 
     <h4 class="section" data-i18n="platforms"></h4>
-    <p class="muted small legend" data-i18n="levels_legend"></p>
+    <p class="muted small legend" id="levels-legend"></p>
     <div class="card list" id="platforms"></div>
 
     <h4 class="section" data-i18n="during_lock"></h4>

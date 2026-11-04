@@ -30,7 +30,8 @@ pub struct ExtensionView {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct View {
-    enabled: bool,
+    shorts_on: bool,
+    sites_on: bool,
     active: bool,
     locked: bool,
     remaining_ms: u64,
@@ -48,7 +49,8 @@ fn view(s: &Snapshot) -> View {
     let eff = st.effective();
     let (connected, last_seen_ms, browser) = sys::extension_status();
     View {
-        enabled: st.enabled,
+        shorts_on: st.shorts_on,
+        sites_on: st.sites_on,
         active: eff.active,
         locked: eff.locked,
         remaining_ms: eff.lock_remaining_ms,
@@ -87,8 +89,13 @@ pub fn get_view() -> Result<View, String> {
 }
 
 #[tauri::command]
-pub fn set_enabled(on: bool) -> Result<View, String> {
-    run(|s| s.set_enabled(on))
+pub fn set_shorts(on: bool) -> Result<View, String> {
+    run(|s| s.set_shorts(on))
+}
+
+#[tauri::command]
+pub fn set_sites(on: bool) -> Result<View, String> {
+    run(|s| s.set_sites(on))
 }
 
 #[tauri::command]

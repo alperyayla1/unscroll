@@ -87,6 +87,7 @@ function selectedMinutes() {
 
 function applyStaticText() {
   document.documentElement.lang = LANG;
+  $("levels-legend").innerHTML = t("levels_legend_html");
   document.querySelectorAll("[data-i18n]").forEach((el) => (el.textContent = t(el.dataset.i18n)));
   const chips = $("chips");
   chips.innerHTML = "";
@@ -115,33 +116,87 @@ function select(m) {
 
 // ---------------------------------------------------------------- render
 
+const PUZZLE = '<svg viewBox="0 0 24 24"><path d="M10 3h4v3a2 2 0 1 0 4 0h0v4h-3a2 2 0 1 0 0 4h3v4h-4v-3a2 2 0 1 0-4 0v3H6v-4h3a2 2 0 1 0 0-4H6V6h4z"/></svg>';
+
+function shortsActive() {
+  return view.locked || view.shortsOn;
+}
+function sitesActive() {
+  return view.locked || view.sitesOn;
+}
+
 function render() {
   if (!view) return;
-  const pill = $("pill");
-  pill.className = "pill " + (view.locked ? "locked" : view.active ? "on" : "off");
-  pill.textContent = view.locked ? t("status_locked") : view.active ? t("status_on") : t("status_off");
+  const ext = view.extension;
+  const anyShorts = view.platforms.some((p) => p.level === "shorts" || (p.allShorts && p.level === "site"));
+  const partial = shortsActive() && anyShorts && !ext.connected;
 
-  const tg = $("main-toggle");
-  const on = view.locked || view.enabled;
-  tg.setAttribute("aria-checked", String(on));
-  tg.classList.toggle("on", on);
-  tg.disabled = view.locked;
-  tg.title = view.locked ? t("err_locked") : "";
+  const pill = $("pill");
+  let st = view.locked ? "locked" : !view.active ? "off" : partial ? "partial" : "on";
+  pill.className = "pill " + st;
+  pill.textContent = t("status_" + st);
+
+  // Shorts card
+  const ts = $("toggle-shorts");
+  ts.classList.toggle("on", shortsActive());
+  ts.setAttribute("aria-checked", String(shortsActive()));
+  ts.disabled = view.locked;
+  $("card-shorts").classList.toggle("dim", !shortsActive());
+  $("ext-status").className = "ext-status " + (ext.connected ? "ok" : "bad");
+  $("ext-dot").className = "dot " + (ext.connected ? "ok" : "bad");
+  $("ext-title").textContent = ext.connected ? t("ext_ok_title") : t("ext_off_title");
+  $("ext-sub").textContent = !shortsActive()
+    ? t("ext_paused_sub")
+    : ext.connected
+    ? t("ext_ok_sub", { b: ext.browser || "browser" })
+    : t("ext_off_sub");
+  $("ext-setup").hidden = ext.connected;
+
+  // Sites card
+  const tsi = $("toggle-sites");
+  tsi.classList.toggle("on", sitesActive());
+  tsi.setAttribute("aria-checked", String(sitesActive()));
+  tsi.disabled = view.locked;
+  $("card-sites").classList.toggle("dim", !sitesActive());
+  const chips = $("site-chips");
+  chips.innerHTML = "";
+  let anySite = false;
+  for (const p of view.platforms) {
+    if (p.allShorts) continue;
+    const sel = p.level === "site";
+    anySite = anySite || sel;
+    const b = document.createElement("button");
+    b.className = "site-chip" + (sel ? " sel" : "");
+    b.textContent = p.name;
+    b.disabled = sel && p.floor === "site";
+    b.onclick = async () => {
+      const next = sel ? (p.supportsShorts ? "shorts" : "open") : "site";
+      const ok = await call("set_level", { id: p.id, level: next });
+      if (ok && next === "site" && !view.sitesOn && !view.locked) call("set_sites", { on: true });
+    };
+    chips.appendChild(b);
+  }
+  $("sites-empty").hidden = anySite;
 
   $("lock-running").hidden = !view.locked;
   $("lock-picker").hidden = view.locked && !extending;
   if (!view.locked) extending = false;
   renderPicker();
   tickCountdown();
-
-  const ext = view.extension;
-  $("ext-dot").className = "dot " + (ext.connected ? "ok" : "bad");
-  $("ext-text").textContent = ext.connected
-    ? ext.browser ? t("ext_on_browser", { b: ext.browser }) : t("ext_on")
-    : t("ext_off");
-  $("ext-setup").hidden = ext.connected;
-
   renderSettings();
+  maybeFirstRunSetup();
+}
+
+function maybeFirstRunSetup() {
+  if (view.extension.connected) return;
+  let seen = false;
+  try {
+    seen = localStorage.getItem("unscroll.setupShown") === "1";
+    localStorage.setItem("unscroll.setupShown", "1");
+  } catch (_) {
+    seen = true;
+  }
+  if (!seen) $("setup").hidden = false;
 }
 
 function renderPicker() {
@@ -190,6 +245,10 @@ function renderSettings() {
     for (const lvl of LEVELS) {
       const b = document.createElement("button");
       b.textContent = t("lvl_" + lvl);
+      if (lvl === "shorts" && p.supportsShorts && !p.allShorts) {
+        b.insertAdjacentHTML("beforeend", PUZZLE);
+        b.title = t("ext_icon_title");
+      }
       const unsupported = lvl === "shorts" && (!p.supportsShorts || p.allShorts);
       const belowFloor = RANK[lvl] < RANK[p.floor];
       b.disabled = unsupported || belowFloor;
@@ -244,11 +303,14 @@ function openConfirm() {
     ul.appendChild(li);
   };
   const shorts = view.platforms.filter((p) => p.level === "shorts").map((p) => p.name);
-  const site = view.platforms.filter((p) => p.level === "site").map((p) => p.name);
+  const tiktokLike = view.platforms.filter((p) => p.allShorts && p.level === "site").map((p) => p.name);
+  const siteOnly = view.platforms.filter((p) => !p.allShorts && p.level === "site").map((p) => p.name);
   // A lock with nothing selected uses the defaults (see State::start_lock).
-  if (!shorts.length && !site.length) shorts.push("YouTube", "Instagram", "Facebook", "Snapchat"), site.push("TikTok");
-  if (shorts.length) add(t("confirm_shorts", { list: shorts.join(", ") }));
-  if (site.length) add(t("confirm_site", { list: site.join(", ") }));
+  if (!shorts.length && !tiktokLike.length && !siteOnly.length) shorts.push("YouTube", "Instagram", "Facebook", "Snapchat"), tiktokLike.push("TikTok");
+  const shortsAll = shorts.concat(tiktokLike);
+  if (shortsAll.length) add(t("confirm_shorts_ext", { list: shortsAll.join(", ") }));
+  if (siteOnly.length) add(t("confirm_site_noext", { list: siteOnly.join(", ") }));
+  if (shortsAll.length && !view.extension.connected) add(t("confirm_no_ext"));
   const h = view.hardening;
   if (h.no_incognito || h.no_guest || h.no_extension_page) add(t("confirm_hard"));
   if (view.locked) {
@@ -291,9 +353,13 @@ function wire() {
   $("btn-min").onclick = () => appWindow.minimize();
   $("btn-close").onclick = () => appWindow.close();
 
-  $("main-toggle").onclick = () => {
+  $("toggle-shorts").onclick = () => {
     if (!view || view.locked) return;
-    call("set_enabled", { on: !view.enabled });
+    call("set_shorts", { on: !view.shortsOn });
+  };
+  $("toggle-sites").onclick = () => {
+    if (!view || view.locked) return;
+    call("set_sites", { on: !view.sitesOn });
   };
 
   ["in-days", "in-hours", "in-mins"].forEach((id) => ($(id).oninput = renderPicker));

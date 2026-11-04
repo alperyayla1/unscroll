@@ -14,7 +14,7 @@
         "label": "main",
         "title": "Unscroll",
         "width": 380,
-        "height": 620,
+        "height": 720,
         "resizable": false,
         "maximizable": false,
         "decorations": false,

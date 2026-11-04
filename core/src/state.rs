@@ -119,8 +119,12 @@ pub struct Clock {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
     pub v: u32,
-    /// Main switch ("Block Shorts").
-    pub enabled: bool,
+    /// "Block Shorts" switch: Shorts levels and all-shorts sites (TikTok). Needs the extension.
+    #[serde(default = "yes")]
+    pub shorts_on: bool,
+    /// "Block sites" switch: Site levels. Works without the extension.
+    #[serde(default = "yes")]
+    pub sites_on: bool,
     pub settings: Settings,
     pub lock: Option<Lock>,
     #[serde(default)]
@@ -133,13 +137,36 @@ pub struct State {
 impl Default for State {
     fn default() -> Self {
         Self {
-            v: 1,
-            enabled: true,
+            v: 2,
+            shorts_on: true,
+            sites_on: true,
             settings: Settings::default(),
             lock: None,
             clock: Clock::default(),
             owned_policies: Vec::new(),
         }
+    }
+}
+
+fn yes() -> bool {
+    true
+}
+
+/// Which switch a platform's current level belongs to.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Category {
+    None,
+    Shorts,
+    Sites,
+}
+
+pub fn category(id: &str, level: Level) -> Category {
+    let all_shorts = platforms::find(id).map_or(false, |p| p.all_shorts);
+    match level {
+        Level::Open => Category::None,
+        Level::Shorts => Category::Shorts,
+        Level::Site if all_shorts => Category::Shorts,
+        Level::Site => Category::Sites,
     }
 }
 
@@ -242,13 +269,28 @@ impl State {
                     hardening: s.hardening,
                 }
             }
-            _ => Effective {
-                active: self.enabled,
-                locked: false,
-                lock_remaining_ms: 0,
-                levels: self.settings.levels.clone(),
-                hardening: self.settings.hardening,
-            },
+            _ => {
+                let levels: BTreeMap<String, Level> = self
+                    .settings
+                    .levels
+                    .iter()
+                    .map(|(id, &lvl)| {
+                        let on = match category(id, lvl) {
+                            Category::None => false,
+                            Category::Shorts => self.shorts_on,
+                            Category::Sites => self.sites_on,
+                        };
+                        (id.clone(), if on { lvl } else { Level::Open })
+                    })
+                    .collect();
+                Effective {
+                    active: levels.values().any(|l| *l != Level::Open),
+                    locked: false,
+                    lock_remaining_ms: 0,
+                    levels,
+                    hardening: self.settings.hardening,
+                }
+            }
         }
     }
 
@@ -267,11 +309,19 @@ impl State {
         }
     }
 
-    pub fn set_enabled(&mut self, on: bool) -> Result<(), RuleError> {
+    pub fn set_shorts(&mut self, on: bool) -> Result<(), RuleError> {
         if !on && self.is_locked() {
             return Err(RuleError::Locked);
         }
-        self.enabled = on;
+        self.shorts_on = on;
+        Ok(())
+    }
+
+    pub fn set_sites(&mut self, on: bool) -> Result<(), RuleError> {
+        if !on && self.is_locked() {
+            return Err(RuleError::Locked);
+        }
+        self.sites_on = on;
         Ok(())
     }
 

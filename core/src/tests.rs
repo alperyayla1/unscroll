@@ -25,7 +25,8 @@ fn defaults_block_shorts_and_tiktok() {
 #[test]
 fn toggle_off_disables_everything_when_unlocked() {
     let mut s = State::default();
-    s.set_enabled(false).unwrap();
+    s.set_shorts(false).unwrap();
+    s.set_sites(false).unwrap();
     let e = s.effective();
     assert!(!e.active);
     assert_eq!(e.level("youtube"), Level::Open);
@@ -36,7 +37,8 @@ fn toggle_off_disables_everything_when_unlocked() {
 #[test]
 fn lock_cannot_be_loosened() {
     let mut s = locked(HOUR);
-    assert_eq!(s.set_enabled(false), Err(RuleError::Locked));
+    assert_eq!(s.set_shorts(false), Err(RuleError::Locked));
+    assert_eq!(s.set_sites(false), Err(RuleError::Locked));
     assert_eq!(s.set_level("youtube", Level::Open), Err(RuleError::Locked));
     assert_eq!(s.set_hard(HardKey::Incognito, false), Err(RuleError::Locked));
     // Tightening is fine.
@@ -50,7 +52,7 @@ fn lock_cannot_be_loosened() {
 #[test]
 fn lock_forces_active_even_if_toggle_was_off() {
     let mut s = State::default();
-    s.set_enabled(false).unwrap();
+    s.set_shorts(false).unwrap();
     s.tick(1, 1_700_000_000_000, None);
     s.start_lock(30 * MIN).unwrap();
     let e = s.effective();
@@ -126,7 +128,7 @@ fn lock_ends() {
     assert!(s.tick(1_000 + 31 * MIN, 0, None));
     assert!(s.lock.is_none());
     assert!(!s.effective().locked);
-    s.set_enabled(false).unwrap();
+    s.set_shorts(false).unwrap();
 }
 
 #[test]
@@ -201,4 +203,39 @@ fn manifest_and_task_are_well_formed() {
     assert!(v["allowed_origins"][0].as_str().unwrap().starts_with("chrome-extension://"));
     let x = task_xml(r"C:\Program Files\Unscroll\unscroll.exe");
     assert!(x.contains("--enforce") && x.contains("S-1-5-18"));
+}
+
+#[test]
+fn switches_are_independent() {
+    let mut s = State::default();
+    s.set_level("x", Level::Site).unwrap();
+    // Shorts off: YouTube Shorts and TikTok open, X still blocked.
+    s.set_shorts(false).unwrap();
+    let e = s.effective();
+    assert_eq!(e.level("youtube"), Level::Open);
+    assert_eq!(e.level("tiktok"), Level::Open);
+    assert_eq!(e.level("x"), Level::Site);
+    assert!(e.active);
+    // Sites off, shorts on.
+    s.set_shorts(true).unwrap();
+    s.set_sites(false).unwrap();
+    let e = s.effective();
+    assert_eq!(e.level("youtube"), Level::Shorts);
+    assert_eq!(e.level("tiktok"), Level::Site);
+    assert_eq!(e.level("x"), Level::Open);
+    // Lock turns both back on.
+    s.tick(1, 1_700_000_000_000, None);
+    s.start_lock(HOUR).unwrap();
+    assert_eq!(s.effective().level("x"), Level::Site);
+}
+
+#[test]
+fn old_state_files_still_load() {
+    let mut v: serde_json::Value = serde_json::to_value(State::default()).unwrap();
+    let o = v.as_object_mut().unwrap();
+    o.remove("shorts_on");
+    o.remove("sites_on");
+    o.insert("enabled".into(), true.into());
+    let s: State = serde_json::from_value(v).unwrap();
+    assert!(s.shorts_on && s.sites_on);
 }

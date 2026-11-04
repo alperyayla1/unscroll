@@ -1,5 +1,5 @@
 // Platform rules. Keep in sync with core/src/platforms.rs.
-export const NATIVE_HOST = "com.darkskystudios.unscroll";
+export const NATIVE_HOST = "com.darkskystudios.unshorts";
 
 const sub = String.raw`^https?://([^/?#]+\.)?`;
 const end = String.raw`([/?#]|$)`;

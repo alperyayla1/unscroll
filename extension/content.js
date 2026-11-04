@@ -49,7 +49,7 @@
     on = v;
     if (v && !style) {
       style = document.createElement("style");
-      style.id = "unscroll-hide";
+      style.id = "unshorts-hide";
       style.textContent = CSS[P];
       (document.head || document.documentElement).appendChild(style);
     } else if (!v && style) {

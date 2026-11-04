@@ -7,14 +7,14 @@ use std::os::windows::process::CommandExt;
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::Duration;
-use unscroll_core::plan::{self, LIST_INDEX_END, LIST_INDEX_START};
-use unscroll_core::state::Effective;
-use unscroll_core::{data_dir, NATIVE_HOST_NAME, TASK_NAME};
+use unshorts_core::plan::{self, LIST_INDEX_END, LIST_INDEX_START};
+use unshorts_core::state::Effective;
+use unshorts_core::{data_dir, NATIVE_HOST_NAME, TASK_NAME};
 use winreg::enums::{HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS, KEY_READ};
 use winreg::RegKey;
 
 const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-const BACKUP_KEY: &str = r"SOFTWARE\DarkSky Studios\Unscroll";
+const BACKUP_KEY: &str = r"SOFTWARE\DarkSky Studios\Unshorts";
 
 fn hklm() -> RegKey {
     RegKey::predef(HKEY_LOCAL_MACHINE)
@@ -249,7 +249,7 @@ fn harden_data_dir() {
 }
 
 fn register_native_host() {
-    let host = exe_dir().join("unscroll-host.exe");
+    let host = exe_dir().join("unshorts-host.exe");
     let manifest = plan::native_host_manifest(&host.to_string_lossy());
     let manifest_path = data_dir().join("native-host.json");
     if std::fs::write(&manifest_path, manifest).is_err() {
@@ -264,7 +264,7 @@ fn register_native_host() {
 }
 
 fn register_task() {
-    let exe = exe_dir().join("unscroll.exe");
+    let exe = exe_dir().join("unshorts.exe");
     let xml = plan::task_xml(&exe.to_string_lossy());
     // The XML declares UTF-16, so write it as UTF-16LE with a BOM.
     let mut bytes = vec![0xFF, 0xFE];
@@ -307,7 +307,7 @@ pub fn cleanup(owned_policies: &mut Vec<String>) {
 /// (connected, last seen ms, browser) from the bridge's heartbeat file.
 pub fn extension_status() -> (bool, u64, String) {
     let Ok(base) = std::env::var("LOCALAPPDATA") else { return (false, 0, String::new()) };
-    let path = std::path::Path::new(&base).join(r"Unscroll\extension.json");
+    let path = std::path::Path::new(&base).join(r"Unshorts\extension.json");
     let Ok(text) = std::fs::read_to_string(path) else { return (false, 0, String::new()) };
     let v: serde_json::Value = serde_json::from_str(&text).unwrap_or_default();
     let ts = v["ts"].as_u64().unwrap_or(0);

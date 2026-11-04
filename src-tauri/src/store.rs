@@ -2,8 +2,8 @@
 //! registry backup copy. Every change goes through `transact`.
 
 use crate::sys;
-use unscroll_core::state::{RuleError, State};
-use unscroll_core::{choose, data_dir, encode, state_path, LoadOutcome};
+use unshorts_core::state::{RuleError, State};
+use unshorts_core::{choose, data_dir, encode, state_path, LoadOutcome};
 
 pub struct Snapshot {
     pub state: State,

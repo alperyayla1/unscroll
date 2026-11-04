@@ -1,4 +1,4 @@
-//! Every platform Unscroll knows about.
+//! Every platform Unshorts knows about.
 //!
 //! `shorts_paths` are path prefixes that only contain short-form video. They are
 //! used for the browser URL block-list policy (`domain/path`). The browser

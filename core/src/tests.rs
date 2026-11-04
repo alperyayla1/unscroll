@@ -197,11 +197,11 @@ fn site_level_blocks_whole_domain() {
 
 #[test]
 fn manifest_and_task_are_well_formed() {
-    let m = native_host_manifest(r"C:\Program Files\Unscroll\unscroll-host.exe");
+    let m = native_host_manifest(r"C:\Program Files\Unshorts\unshorts-host.exe");
     let v: serde_json::Value = serde_json::from_str(&m).unwrap();
     assert_eq!(v["name"], NATIVE_HOST_NAME);
     assert!(v["allowed_origins"][0].as_str().unwrap().starts_with("chrome-extension://"));
-    let x = task_xml(r"C:\Program Files\Unscroll\unscroll.exe");
+    let x = task_xml(r"C:\Program Files\Unshorts\unshorts.exe");
     assert!(x.contains("--enforce") && x.contains("S-1-5-18"));
 }
 

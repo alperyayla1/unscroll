@@ -10,7 +10,7 @@ mod sys;
 #[path = "sys_stub.rs"]
 mod sys;
 
-use unscroll_core::state::RuleError;
+use unshorts_core::state::RuleError;
 
 fn main() {
     let arg = std::env::args().nth(1).unwrap_or_default();
@@ -62,5 +62,5 @@ fn run_app() {
             commands::open_extension_folder,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running Unscroll");
+        .expect("error while running Unshorts");
 }

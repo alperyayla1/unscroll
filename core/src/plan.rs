@@ -6,8 +6,8 @@ use crate::platforms::PLATFORMS;
 use crate::state::{Effective, Level};
 use crate::{EXTENSION_IDS_CHROME, EXTENSION_IDS_EDGE, NATIVE_HOST_NAME};
 
-pub const HOSTS_BEGIN: &str = "# >>> Unscroll (DarkSky Studios) - do not edit >>>";
-pub const HOSTS_END: &str = "# <<< Unscroll <<<";
+pub const HOSTS_BEGIN: &str = "# >>> Unshorts (DarkSky Studios) - do not edit >>>";
+pub const HOSTS_END: &str = "# <<< Unshorts <<<";
 
 /// Value names we use inside list policies (URLBlocklist etc.). A high, fixed
 /// range so we never touch entries the user or an admin created.
@@ -173,7 +173,7 @@ pub fn allowed_origins() -> Vec<String> {
 pub fn native_host_manifest(host_exe: &str) -> String {
     serde_json::to_string_pretty(&serde_json::json!({
         "name": NATIVE_HOST_NAME,
-        "description": "Unscroll bridge between the desktop app and the browser extension",
+        "description": "Unshorts bridge between the desktop app and the browser extension",
         "path": host_exe,
         "type": "stdio",
         "allowed_origins": allowed_origins(),
@@ -194,7 +194,7 @@ pub fn task_xml(exe: &str) -> String {
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
     <Author>DarkSky Studios</Author>
-    <Description>Keeps Unscroll's blocks and focus lock in place.</Description>
+    <Description>Keeps Unshorts's blocks and focus lock in place.</Description>
   </RegistrationInfo>
   <Triggers>
     <BootTrigger><Enabled>true</Enabled></BootTrigger>

@@ -1,9 +1,9 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Unscroll",
-  "mainBinaryName": "unscroll",
+  "productName": "Unshorts",
+  "mainBinaryName": "unshorts",
   "version": "1.0.0",
-  "identifier": "com.darkskystudios.unscroll",
+  "identifier": "com.darkskystudios.unshorts",
   "build": {
     "frontendDist": "../ui"
   },
@@ -12,7 +12,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Unscroll",
+        "title": "Unshorts",
         "width": 380,
         "height": 720,
         "resizable": false,
@@ -39,7 +39,7 @@
       "icons/128x128@2x.png",
       "icons/icon.ico"
     ],
-    "externalBin": ["binaries/unscroll-host"],
+    "externalBin": ["binaries/unshorts-host"],
     "resources": {
       "../extension/": "extension/"
     },

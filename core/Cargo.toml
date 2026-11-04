@@ -1,5 +1,5 @@
 [package]
-name = "unscroll-core"
+name = "unshorts-core"
 version.workspace = true
 edition.workspace = true
 

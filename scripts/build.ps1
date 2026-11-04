@@ -1,4 +1,4 @@
-# Builds the Unscroll installer (NSIS .exe).
+# Builds the Unshorts installer (NSIS .exe).
 # Requirements: Rust (MSVC), WebView2 (preinstalled on Win 10/11), and:
 #   cargo install tauri-cli --version "^2" --locked
 # Run from the project root:  powershell -ExecutionPolicy Bypass -File scripts\build.ps1
@@ -12,9 +12,9 @@ $triple = ((rustc -vV) | Select-String "^host:").ToString().Split(" ")[1]
 $profile = if ($Dev) { "debug" } else { "release" }
 
 Write-Host "Building native host ($profile)..."
-if ($Dev) { cargo build -p unscroll-host } else { cargo build --release -p unscroll-host }
+if ($Dev) { cargo build -p unshorts-host } else { cargo build --release -p unshorts-host }
 New-Item -ItemType Directory -Force src-tauri\binaries | Out-Null
-Copy-Item "target\$profile\unscroll-host.exe" "src-tauri\binaries\unscroll-host-$triple.exe" -Force
+Copy-Item "target\$profile\unshorts-host.exe" "src-tauri\binaries\unshorts-host-$triple.exe" -Force
 
 Push-Location src-tauri
 try {

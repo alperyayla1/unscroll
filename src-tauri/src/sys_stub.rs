@@ -1,7 +1,7 @@
 //! Non-Windows stand-in so the UI can be developed elsewhere. Enforces nothing.
 
 use std::path::PathBuf;
-use unscroll_core::state::Effective;
+use unshorts_core::state::Effective;
 
 pub struct StateLock;
 impl StateLock {

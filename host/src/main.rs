@@ -3,7 +3,7 @@
 #![windows_subsystem = "windows"]
 
 use std::io::{Read, Write};
-use unscroll_core::{decode, state::State, state_path};
+use unshorts_core::{decode, state::State, state_path};
 
 fn read_message() -> Option<serde_json::Value> {
     let mut len = [0u8; 4];
@@ -28,7 +28,7 @@ fn write_message(v: &serde_json::Value) {
 /// Lets the app show "extension connected".
 fn heartbeat(origin: &str, browser: &str) {
     let Ok(base) = std::env::var("LOCALAPPDATA") else { return };
-    let dir = std::path::Path::new(&base).join("Unscroll");
+    let dir = std::path::Path::new(&base).join("Unshorts");
     let _ = std::fs::create_dir_all(&dir);
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -51,7 +51,7 @@ fn main() {
         Err(_) => State::default(),
     };
     let eff = state.effective();
-    let levels: serde_json::Map<String, serde_json::Value> = unscroll_core::platforms::PLATFORMS
+    let levels: serde_json::Map<String, serde_json::Value> = unshorts_core::platforms::PLATFORMS
         .iter()
         .map(|p| (p.id.to_string(), serde_json::to_value(eff.level(p.id)).unwrap_or_default()))
         .collect();

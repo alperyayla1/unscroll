@@ -3641,7 +3641,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c6f5d3c3b1bf09027a88a6bc961fc00497d651009560b5463668dc81b0fa87a8"
 
 [[package]]
-name = "unscroll"
+name = "unshorts"
 version = "1.0.0"
 dependencies = [
  "httpdate",
@@ -3649,14 +3649,14 @@ dependencies = [
  "serde_json",
  "tauri",
  "tauri-build",
- "unscroll-core",
+ "unshorts-core",
  "ureq",
  "windows-sys 0.59.0",
  "winreg 0.55.0",
 ]
 
 [[package]]
-name = "unscroll-core"
+name = "unshorts-core"
 version = "1.0.0"
 dependencies = [
  "serde",
@@ -3665,11 +3665,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "unscroll-host"
+name = "unshorts-host"
 version = "1.0.0"
 dependencies = [
  "serde_json",
- "unscroll-core",
+ "unshorts-core",
 ]
 
 [[package]]

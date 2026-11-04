@@ -191,8 +191,8 @@ function maybeFirstRunSetup() {
   if (view.extension.connected) return;
   let seen = false;
   try {
-    seen = localStorage.getItem("unscroll.setupShown") === "1";
-    localStorage.setItem("unscroll.setupShown", "1");
+    seen = localStorage.getItem("unshorts.setupShown") === "1";
+    localStorage.setItem("unshorts.setupShown", "1");
   } catch (_) {
     seen = true;
   }

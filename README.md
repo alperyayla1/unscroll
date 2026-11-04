@@ -1,4 +1,4 @@
-# Unscroll — DarkSky Studios
+# Unshorts — DarkSky Studios
 
 Windows için hafif bir shorts/doomscrolling engelleyici. Tauri 2 (Rust + HTML), kurulum dosyası ~5 MB.
 
@@ -7,9 +7,9 @@ Windows için hafif bir shorts/doomscrolling engelleyici. Tauri 2 (Rust + HTML),
 | Katman | Ne yapar | Nerede |
 |---|---|---|
 | **Uygulama** | Ayarlar, süreli kilit, onay ekranı | `src-tauri/`, `ui/` |
-| **Arka plan görevi** | Her dakika ve her açılışta SYSTEM olarak `unscroll.exe --enforce` çalışır. Uygulama kapalıyken de kilidi sayar ve engelleri yeniden uygular. | Görev Zamanlayıcı → `DarkSky Studios\Unscroll Enforcer` |
+| **Arka plan görevi** | Her dakika ve her açılışta SYSTEM olarak `unshorts.exe --enforce` çalışır. Uygulama kapalıyken de kilidi sayar ve engelleri yeniden uygular. | Görev Zamanlayıcı → `DarkSky Studios\Unshorts Enforcer` |
 | **Tarayıcı politikaları** | Chrome/Edge/Brave'e `URLBlocklist` yazar (`youtube.com/shorts` gibi). Kilit sırasında gizli pencere, misafir profil ve `chrome://extensions` kapanır, böylece uzantı kapatılamaz. | `HKLM\SOFTWARE\Policies\...` (9001–9999 indeksleri, kullanıcının kendi girdilerine dokunmaz) |
-| **hosts dosyası** | "Site" seviyesindeki platformları tamamen kapatır, masaüstü uygulamaları dahil. | `# >>> Unscroll` bloğu |
+| **hosts dosyası** | "Site" seviyesindeki platformları tamamen kapatır, masaüstü uygulamaları dahil. | `# >>> Unshorts` bloğu |
 | **Tarayıcı uzantısı** | Shorts sayfalarını engel sayfasına yönlendirir (sayfa yüklemesi + YouTube/Instagram'ın SPA geçişleri), ana sayfadaki Shorts rafını, sekmeleri ve linkleri gizler. | `extension/` |
 | **Native host** | Uzantının uygulamadan ayar okuduğu küçük köprü exe'si (salt okunur, admin istemez). | `host/` |
 | **Çekirdek** | Durum modeli, kurallar, kilit saati, imzalama. Platformdan bağımsız, testli. | `core/` |
@@ -39,14 +39,14 @@ Tarayıcılar: Chrome, Edge, Brave, Opera (Opera'da politika katmanı yok, sadec
 # bir kere
 cargo install tauri-cli --version "^2" --locked
 
-# kurulum dosyası → target\release\bundle\nsis\Unscroll_1.0.0_x64-setup.exe
+# kurulum dosyası → target\release\bundle\nsis\Unshorts_1.0.0_x64-setup.exe
 powershell -ExecutionPolicy Bypass -File scripts\build.ps1
 
 # geliştirme (YÖNETİCİ terminalde; uygulama admin ister)
 powershell -ExecutionPolicy Bypass -File scripts\build.ps1 -Dev
 ```
 
-Testler: `cargo test -p unscroll-core`
+Testler: `cargo test -p unshorts-core`
 
 ## Uzantı
 

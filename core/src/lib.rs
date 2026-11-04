@@ -1,4 +1,4 @@
-//! Shared logic for the Unscroll app, its background enforcer and the
+//! Shared logic for the Unshorts app, its background enforcer and the
 //! native-messaging host. No platform code lives here.
 
 pub mod plan;
@@ -9,9 +9,9 @@ use sha2::{Digest, Sha256};
 use state::State;
 use std::path::PathBuf;
 
-pub const APP_NAME: &str = "Unscroll";
-pub const NATIVE_HOST_NAME: &str = "com.darkskystudios.unscroll";
-pub const TASK_NAME: &str = r"DarkSky Studios\Unscroll Enforcer";
+pub const APP_NAME: &str = "Unshorts";
+pub const NATIVE_HOST_NAME: &str = "com.darkskystudios.unshorts";
+pub const TASK_NAME: &str = r"DarkSky Studios\Unshorts Enforcer";
 
 /// ID of the unpacked extension (fixed by the "key" in extension/manifest.json).
 pub const EXTENSION_ID_DEV: &str = "apjejhddoodocpnbmjkamfphefgfmmkc";
@@ -23,10 +23,10 @@ pub const EXTENSION_IDS_EDGE: &[&str] = &[];
 
 /// Makes hand-editing state.json pointless: an edited file fails the check and
 /// the backup copy (or a strict default) is used instead.
-const SIGN_SALT: &[u8] = b"unscroll/darksky/v1/7f3c2e91b4a0";
+const SIGN_SALT: &[u8] = b"unshorts/darksky/v1/7f3c2e91b4a0";
 
 pub fn data_dir() -> PathBuf {
-    if let Ok(p) = std::env::var("UNSCROLL_DATA_DIR") {
+    if let Ok(p) = std::env::var("UNSHORTS_DATA_DIR") {
         return PathBuf::from(p);
     }
     let base = std::env::var("ProgramData").unwrap_or_else(|_| r"C:\ProgramData".into());

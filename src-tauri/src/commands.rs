@@ -3,9 +3,9 @@
 use crate::store::{transact, Snapshot};
 use crate::sys;
 use serde::Serialize;
-use unscroll_core::platforms::PLATFORMS;
-use unscroll_core::state::{HardKey, Hardening, Level};
-use unscroll_core::LoadOutcome;
+use unshorts_core::platforms::PLATFORMS;
+use unshorts_core::state::{HardKey, Hardening, Level};
+use unshorts_core::LoadOutcome;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -79,7 +79,7 @@ fn view(s: &Snapshot) -> View {
     }
 }
 
-fn run(f: impl FnOnce(&mut unscroll_core::state::State) -> Result<(), unscroll_core::state::RuleError>) -> Result<View, String> {
+fn run(f: impl FnOnce(&mut unshorts_core::state::State) -> Result<(), unshorts_core::state::RuleError>) -> Result<View, String> {
     transact(f).map(|((), snap)| view(&snap))
 }
 

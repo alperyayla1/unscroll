@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unscroll</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="titlebar" data-tauri-drag-region>
+    <div class="brand" data-tauri-drag-region>
+      <img src="logo.png" alt="" class="logo" data-tauri-drag-region />
+      <span data-tauri-drag-region>Unscroll</span>
+    </div>
+    <span id="pill" class="pill" data-tauri-drag-region></span>
+    <div class="winbtns">
+      <button id="btn-min" class="winbtn" aria-label="Minimize"><svg viewBox="0 0 10 10"><path d="M1 5h8"/></svg></button>
+      <button id="btn-close" class="winbtn close" aria-label="Close"><svg viewBox="0 0 10 10"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7"/></svg></button>
+    </div>
+  </header>
+
+  <main id="view-main" class="view">
+    <!-- Main switch -->
+    <section class="card switch-card">
+      <div class="switch-text">
+        <h2 data-i18n="block_title"></h2>
+        <p data-i18n="block_sub"></p>
+      </div>
+      <button id="main-toggle" class="toggle big" role="switch" aria-checked="false"><span></span></button>
+    </section>
+
+    <!-- Focus lock: picker -->
+    <section class="card" id="lock-picker">
+      <div class="card-head">
+        <h3 data-i18n="lock_title"></h3>
+        <svg class="ico" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      </div>
+      <p class="muted" data-i18n="lock_sub"></p>
+      <div class="chips" id="chips"></div>
+      <div class="custom" id="custom" hidden>
+        <label><input id="in-days" type="number" min="0" max="365" inputmode="numeric" placeholder="0" /><span data-i18n="unit_d"></span></label>
+        <label><input id="in-hours" type="number" min="0" max="23" inputmode="numeric" placeholder="0" /><span data-i18n="unit_h"></span></label>
+        <label><input id="in-mins" type="number" min="0" max="59" inputmode="numeric" placeholder="0" /><span data-i18n="unit_m"></span></label>
+      </div>
+      <button id="btn-lock" class="primary" disabled></button>
+    </section>
+
+    <!-- Focus lock: running -->
+    <section class="card locked-card" id="lock-running" hidden>
+      <div class="card-head">
+        <h3 data-i18n="locked_title"></h3>
+        <svg class="ico accent" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      </div>
+      <div class="countdown" id="countdown">00:00:00</div>
+      <div class="bar"><span id="bar"></span></div>
+      <p class="muted small" id="ends-at"></p>
+      <button id="btn-extend" class="ghost" data-i18n="extend"></button>
+    </section>
+
+    <button class="row-link" id="open-settings">
+      <span data-i18n="advanced"></span>
+      <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+
+    <footer class="ext" id="ext">
+      <span class="dot" id="ext-dot"></span>
+      <span id="ext-text"></span>
+      <button id="ext-setup" class="link" data-i18n="setup"></button>
+    </footer>
+  </main>
+
+  <!-- Advanced settings -->
+  <section id="view-settings" class="view" hidden>
+    <button class="back" id="close-settings">
+      <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      <span data-i18n="advanced"></span>
+    </button>
+
+    <h4 class="section" data-i18n="platforms"></h4>
+    <p class="muted small legend" data-i18n="levels_legend"></p>
+    <div class="card list" id="platforms"></div>
+
+    <h4 class="section" data-i18n="during_lock"></h4>
+    <div class="card list" id="hardening"></div>
+    <p class="muted small" data-i18n="hard_note"></p>
+  </section>
+
+  <!-- Confirm lock -->
+  <div class="modal" id="confirm" hidden>
+    <div class="sheet">
+      <h2 id="confirm-title"></h2>
+      <ul class="summary" id="confirm-summary"></ul>
+      <p class="warn" data-i18n="confirm_warn"></p>
+      <button id="hold" class="hold"><span class="fill"></span><span class="label" data-i18n="hold"></span></button>
+      <button id="confirm-cancel" class="ghost" data-i18n="cancel"></button>
+    </div>
+  </div>
+
+  <!-- Extension setup -->
+  <div class="modal" id="setup" hidden>
+    <div class="sheet">
+      <h2 data-i18n="setup_title"></h2>
+      <ol class="steps">
+        <li data-i18n="step1"></li>
+        <li><span data-i18n="step2"></span> <code id="ext-url">chrome://extensions</code> <button class="link" id="copy-url" data-i18n="copy"></button></li>
+        <li data-i18n="step3"></li>
+        <li data-i18n="step4"></li>
+      </ol>
+      <p class="muted small" data-i18n="setup_note"></p>
+      <button id="open-folder" class="primary" data-i18n="open_folder"></button>
+      <button id="setup-close" class="ghost" data-i18n="done"></button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

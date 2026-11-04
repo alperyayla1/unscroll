@@ -1,0 +1,9 @@
+[package]
+name = "unscroll-host"
+version.workspace = true
+edition.workspace = true
+description = "Native messaging host: tells the browser extension what to block"
+
+[dependencies]
+unscroll-core = { path = "../core" }
+serde_json = "1"

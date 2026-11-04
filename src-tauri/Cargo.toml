@@ -1,0 +1,20 @@
+[package]
+name = "unscroll"
+version.workspace = true
+edition.workspace = true
+description = "Unscroll - block Shorts, Reels and doomscrolling"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+unscroll-core = { path = "../core" }
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.55"
+windows-sys = { version = "0.59", features = ["Win32_System_SystemInformation"] }
+ureq = { version = "2", default-features = false, features = ["tls"] }
+httpdate = "1"

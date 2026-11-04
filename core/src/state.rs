@@ -120,10 +120,10 @@ pub struct Clock {
 pub struct State {
     pub v: u32,
     /// "Block Shorts" switch: Shorts levels and all-shorts sites (TikTok). Needs the extension.
-    #[serde(default = "yes")]
+    #[serde(default)]
     pub shorts_on: bool,
     /// "Block sites" switch: Site levels. Works without the extension.
-    #[serde(default = "yes")]
+    #[serde(default)]
     pub sites_on: bool,
     pub settings: Settings,
     pub lock: Option<Lock>,
@@ -138,18 +138,15 @@ impl Default for State {
     fn default() -> Self {
         Self {
             v: 2,
-            shorts_on: true,
-            sites_on: true,
+            // A fresh install blocks nothing until the user turns something on.
+            shorts_on: false,
+            sites_on: false,
             settings: Settings::default(),
             lock: None,
             clock: Clock::default(),
             owned_policies: Vec::new(),
         }
     }
-}
-
-fn yes() -> bool {
-    true
 }
 
 /// Which switch a platform's current level belongs to.
@@ -243,6 +240,11 @@ impl HardKey {
 }
 
 impl State {
+    /// Used when the saved state was tampered with: everything on.
+    pub fn strict() -> State {
+        State { shorts_on: true, sites_on: true, ..State::default() }
+    }
+
     pub fn normalize(&mut self) {
         self.settings.normalize();
         if let Some(l) = &mut self.lock {

@@ -17,21 +17,21 @@ fn main() {
     match arg.as_str() {
         // Background enforcer, run every minute by the scheduled task.
         "--enforce" => {
-            let _ = store::transact(|_| Ok(()));
+            let _ = store::transact(store::Mode::Enforce, |_| Ok(()));
         }
         // Installer: register everything and apply the current state.
         "--setup" => {
             sys::setup();
-            let _ = store::transact(|_| Ok(()));
+            let _ = store::transact(store::Mode::Enforce, |_| Ok(()));
         }
         // Uninstaller: exit code 1 while a lock is running.
         "--uninstall-check" => {
-            let locked = store::transact(|s| Ok::<bool, RuleError>(s.is_locked())).map(|(l, _)| l).unwrap_or(true);
+            let locked = store::transact(store::Mode::Enforce, |s| Ok::<bool, RuleError>(s.is_locked())).map(|(l, _)| l).unwrap_or(true);
             std::process::exit(if locked { 1 } else { 0 });
         }
         // Uninstaller: remove every trace. Refuses while locked.
         "--cleanup" => {
-            let r = store::transact(|s| {
+            let r = store::transact(store::Mode::Enforce, |s| {
                 if s.is_locked() {
                     return Err(RuleError::Locked);
                 }
@@ -49,8 +49,12 @@ fn main() {
 }
 
 fn run_app() {
-    // Cheap and idempotent: keeps the task and the extension bridge pointing at this exe.
-    sys::setup();
+    // Idempotent: keeps the task and the extension bridge pointing at this exe.
+    // Done off the UI thread so the window opens instantly.
+    std::thread::spawn(|| {
+        sys::setup();
+        store::schedule_apply();
+    });
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             commands::get_view,

@@ -87,8 +87,6 @@
 
   const apply = (cfg) => setOn(!!cfg && cfg.active && cfg.levels && cfg.levels[P] === "shorts");
 
-  // Fail closed until the background answers.
-  setOn(true);
   chrome.runtime.sendMessage({ type: "get" }).then((r) => r && apply(r.config)).catch(() => {});
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg && msg.type === "config") apply(msg.config);

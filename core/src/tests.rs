@@ -5,6 +5,11 @@ use crate::*;
 const MIN: u64 = 60_000;
 const HOUR: u64 = 3_600_000;
 
+/// Both switches on, default levels.
+fn on() -> State {
+    State::strict()
+}
+
 fn locked(ms: u64) -> State {
     let mut s = State::default();
     s.tick(1_000, 1_700_000_000_000, None);
@@ -13,8 +18,16 @@ fn locked(ms: u64) -> State {
 }
 
 #[test]
-fn defaults_block_shorts_and_tiktok() {
-    let s = State::default();
+fn fresh_install_blocks_nothing() {
+    let e = State::default().effective();
+    assert!(!e.active);
+    assert_eq!(e.level("youtube"), Level::Open);
+    assert!(hosts_entries(&e).is_empty());
+}
+
+#[test]
+fn defaults_block_shorts_and_tiktok_when_on() {
+    let s = on();
     let e = s.effective();
     assert!(e.active);
     assert_eq!(e.level("youtube"), Level::Shorts);
@@ -24,7 +37,7 @@ fn defaults_block_shorts_and_tiktok() {
 
 #[test]
 fn toggle_off_disables_everything_when_unlocked() {
-    let mut s = State::default();
+    let mut s = on();
     s.set_shorts(false).unwrap();
     s.set_sites(false).unwrap();
     let e = s.effective();
@@ -147,10 +160,11 @@ fn tamper_detection_and_restore() {
     // Replacing the file with an older, unlocked but validly signed state: the locked backup wins.
     let (r, _) = choose(Some(&encode(&State::default())), Some(&good));
     assert!(r.is_locked());
-    // Both garbage: strict default.
+    // Both garbage: strict state, everything on.
     let (r, o) = choose(Some("x"), Some("y"));
     assert_eq!(o, LoadOutcome::Reset);
     assert!(r.effective().active);
+    assert!(r.shorts_on && r.sites_on);
     let (_, o) = choose(None, None);
     assert_eq!(o, LoadOutcome::Fresh);
 }
@@ -158,7 +172,7 @@ fn tamper_detection_and_restore() {
 #[test]
 fn hosts_rewrite_is_idempotent_and_reversible() {
     let orig = "127.0.0.1 localhost\r\n# my stuff\r\n";
-    let e = State::default().effective();
+    let e = on().effective();
     let entries = hosts_entries(&e);
     assert!(entries.contains(&"www.tiktok.com"));
     let once = rewrite_hosts(orig, &entries);
@@ -171,7 +185,7 @@ fn hosts_rewrite_is_idempotent_and_reversible() {
 
 #[test]
 fn policies_follow_lock_hardening() {
-    let s = State::default();
+    let s = on();
     let p = vendor_policies(&s.effective());
     assert!(p.iter().all(|v| v.dwords.is_empty()));
     assert!(p[0].url_blocklist.contains(&"youtube.com/shorts".to_string()));
@@ -187,7 +201,7 @@ fn policies_follow_lock_hardening() {
 
 #[test]
 fn site_level_blocks_whole_domain() {
-    let mut s = State::default();
+    let mut s = on();
     s.set_level("x", Level::Site).unwrap();
     let e = s.effective();
     assert!(url_blocklist_common(&e).contains(&"x.com".to_string()));
@@ -207,7 +221,7 @@ fn manifest_and_task_are_well_formed() {
 
 #[test]
 fn switches_are_independent() {
-    let mut s = State::default();
+    let mut s = on();
     s.set_level("x", Level::Site).unwrap();
     // Shorts off: YouTube Shorts and TikTok open, X still blocked.
     s.set_shorts(false).unwrap();
@@ -237,5 +251,5 @@ fn old_state_files_still_load() {
     o.remove("sites_on");
     o.insert("enabled".into(), true.into());
     let s: State = serde_json::from_value(v).unwrap();
-    assert!(s.shorts_on && s.sites_on);
+    assert!(!s.shorts_on && !s.sites_on);
 }

@@ -71,7 +71,7 @@ pub enum LoadOutcome {
     Fresh,
     /// File was invalid; the backup was used.
     Restored,
-    /// File and backup invalid: strict default (blocking on).
+    /// File and backup invalid: strict state (everything on).
     Reset,
 }
 
@@ -93,7 +93,7 @@ pub fn choose(file: Option<&str>, backup: Option<&str>) -> (State, LoadOutcome) 
         (Some(f), None) => (f, LoadOutcome::Ok),
         (None, Some(b)) => (b, LoadOutcome::Restored),
         (None, None) if file.is_none() && backup.is_none() => (State::default(), LoadOutcome::Fresh),
-        (None, None) => (State::default(), LoadOutcome::Reset),
+        (None, None) => (State::strict(), LoadOutcome::Reset),
     }
 }
 

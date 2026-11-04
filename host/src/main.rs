@@ -47,7 +47,7 @@ fn main() {
     // A missing file means the app was never set up. A tampered one means
     // someone edited it: answer with the strict default rather than "off".
     let state = match std::fs::read_to_string(state_path()) {
-        Ok(text) => decode(&text).unwrap_or_else(State::default),
+        Ok(text) => decode(&text).unwrap_or_else(State::strict),
         Err(_) => State::default(),
     };
     let eff = state.effective();

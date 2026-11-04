@@ -170,6 +170,7 @@ function render() {
     b.textContent = p.name;
     b.disabled = sel && p.floor === "site";
     b.onclick = async () => {
+      b.classList.toggle("sel", !sel); // instant feedback
       const next = sel ? (p.supportsShorts ? "shorts" : "open") : "site";
       const ok = await call("set_level", { id: p.id, level: next });
       if (ok && next === "site" && !view.sitesOn && !view.locked) call("set_sites", { on: true });
@@ -184,9 +185,9 @@ function render() {
   renderPicker();
   tickCountdown();
   renderSettings();
-  maybeFirstRunSetup();
 }
 
+/** The first time Shorts is turned on without the extension, show how to add it. */
 function maybeFirstRunSetup() {
   if (view.extension.connected) return;
   let seen = false;
@@ -353,12 +354,15 @@ function wire() {
   $("btn-min").onclick = () => appWindow.minimize();
   $("btn-close").onclick = () => appWindow.close();
 
-  $("toggle-shorts").onclick = () => {
+  $("toggle-shorts").onclick = async () => {
     if (!view || view.locked) return;
-    call("set_shorts", { on: !view.shortsOn });
+    const on = !view.shortsOn;
+    $("toggle-shorts").classList.toggle("on", on); // instant feedback
+    if ((await call("set_shorts", { on })) && on) maybeFirstRunSetup();
   };
   $("toggle-sites").onclick = () => {
     if (!view || view.locked) return;
+    $("toggle-sites").classList.toggle("on", !view.sitesOn);
     call("set_sites", { on: !view.sitesOn });
   };
 

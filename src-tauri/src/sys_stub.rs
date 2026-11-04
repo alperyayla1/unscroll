@@ -42,3 +42,4 @@ pub fn extension_folder() -> PathBuf {
     PathBuf::from("../extension")
 }
 pub fn open_path(_path: &std::path::Path) {}
+pub fn log(_line: &str) {}

@@ -54,10 +54,10 @@ export const PLATFORMS = {
   },
 };
 
-// Used when the desktop app can't be reached and nothing is cached:
-// fail closed, same as the app's defaults.
+// Used when the desktop app can't be reached and nothing is cached.
+// Matches a fresh install: nothing is blocked until turned on in the app.
 export const DEFAULT_CONFIG = {
-  active: true,
+  active: false,
   locked: false,
   remainingMs: 0,
   levels: {

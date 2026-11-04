@@ -127,7 +127,8 @@ fn sync_hosts(entries: &[&str]) {
     }
     if let Ok(mut f) = std::fs::File::create(&path) {
         if f.write_all(updated.as_bytes()).is_ok() {
-            run_hidden("ipconfig", &["/flushdns"]);
+            // Don't wait for it.
+            let _ = Command::new("ipconfig").arg("/flushdns").creation_flags(CREATE_NO_WINDOW).spawn();
         }
     }
 }
@@ -214,8 +215,22 @@ fn sync_policies(eff: &Effective, owned: &mut Vec<String>) {
 }
 
 pub fn apply(eff: &Effective, owned_policies: &mut Vec<String>) {
+    let t = std::time::Instant::now();
     sync_hosts(&plan::hosts_entries(eff));
+    let hosts_ms = t.elapsed().as_millis();
     sync_policies(eff, owned_policies);
+    log(&format!("apply hosts {hosts_ms} ms, policies {} ms", t.elapsed().as_millis() - hosts_ms));
+}
+
+/// Small rolling log in the data folder, for diagnosing slow machines.
+pub fn log(line: &str) {
+    let path = data_dir().join("log.txt");
+    if std::fs::metadata(&path).map_or(false, |m| m.len() > 64 * 1024) {
+        let _ = std::fs::remove_file(&path);
+    }
+    if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(&path) {
+        let _ = writeln!(f, "{} {}", system_ms(), line);
+    }
 }
 
 // ---------------------------------------------------------------- setup / cleanup

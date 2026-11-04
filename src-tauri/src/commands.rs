@@ -1,6 +1,6 @@
 //! Commands the UI calls. Each returns the full view so the UI just re-renders.
 
-use crate::store::{transact, Snapshot};
+use crate::store::{transact, Mode, Snapshot};
 use crate::sys;
 use serde::Serialize;
 use unshorts_core::platforms::PLATFORMS;
@@ -80,37 +80,37 @@ fn view(s: &Snapshot) -> View {
 }
 
 fn run(f: impl FnOnce(&mut unshorts_core::state::State) -> Result<(), unshorts_core::state::RuleError>) -> Result<View, String> {
-    transact(f).map(|((), snap)| view(&snap))
+    transact(Mode::Ui, f).map(|((), snap)| view(&snap))
 }
 
 #[tauri::command]
-pub fn get_view() -> Result<View, String> {
+pub async fn get_view() -> Result<View, String> {
     run(|_| Ok(()))
 }
 
 #[tauri::command]
-pub fn set_shorts(on: bool) -> Result<View, String> {
+pub async fn set_shorts(on: bool) -> Result<View, String> {
     run(|s| s.set_shorts(on))
 }
 
 #[tauri::command]
-pub fn set_sites(on: bool) -> Result<View, String> {
+pub async fn set_sites(on: bool) -> Result<View, String> {
     run(|s| s.set_sites(on))
 }
 
 #[tauri::command]
-pub fn set_level(id: String, level: Level) -> Result<View, String> {
+pub async fn set_level(id: String, level: Level) -> Result<View, String> {
     run(|s| s.set_level(&id, level))
 }
 
 #[tauri::command]
-pub fn set_hard(key: String, on: bool) -> Result<View, String> {
+pub async fn set_hard(key: String, on: bool) -> Result<View, String> {
     let key = HardKey::parse(&key).ok_or_else(|| "unknown_setting".to_string())?;
     run(|s| s.set_hard(key, on))
 }
 
 #[tauri::command]
-pub fn start_lock(minutes: u64) -> Result<View, String> {
+pub async fn start_lock(minutes: u64) -> Result<View, String> {
     let ms = minutes.saturating_mul(60_000);
     run(|s| s.start_lock(ms))
 }
